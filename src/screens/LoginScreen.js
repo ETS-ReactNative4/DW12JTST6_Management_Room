@@ -2,12 +2,12 @@ import React, { Component } from 'react';
 import { View, Text, StyleSheet, TextInput, ScrollView} from 'react-native';
 import { Button, Icon, Spinner } from 'native-base';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import axios from 'axios';
 import Logo from '../components/Logo';
 import AuthService from '../AuthService';
-import * as URL from '../../ENV_URL';
+import { connect } from 'react-redux';
+import * as actionUsers from './../redux/actions/actionUsers';
 
-export default class LoginScreen extends Component {
+class LoginScreen extends Component {
     constructor(){
         super();
         this.state ={
@@ -40,34 +40,19 @@ export default class LoginScreen extends Component {
         }
     }
     checkLogin = async() =>{
-        const auth = new (AuthService);
-        const url = 'http://192.168.43.233:4000/api/v2/login';
-        await axios({
-            method : 'POST',
-            headers :{
-                'content-type': 'application/json',
-            },
-            data : {
-                email :this.state.email,
-                password: this.state.password
-            },
-            url,
-        }).then(async result =>{
-            console.log("RSULT : "+result.data)
-            if(result.data.error){
-                alert("incorrect username and password")
-            }else{
-                const user = {
-                    // id:result.data.id.toString(),
-                    token:result.data.token
-                }
-                await auth.save(user)
-                this.props.navigation.navigate('Room');
-                    
-            }
-        }).catch(error=>{
-            console.log('errornya: ',error)
-        })
+        const data = {
+            email :this.state.email,
+            password: this.state.password
+        }
+        await this.props.authLogin(data)
+        const login = this.props.authDataLocal.users
+        if(login){
+            const auth = new (AuthService)
+            await auth.save(login)
+            this.props.navigation.navigate('Room')
+        }else{
+            alert(login.message)
+        }
     }
     showPassword=()=>{
         this.setState({
@@ -183,3 +168,18 @@ const styles = StyleSheet.create({
         fontWeight:'500'
     }
 })
+
+const mapStateToProps = state => {
+    return {
+        authDataLocal: state.Users
+    }
+  }
+  const mapDispatchToProps = dispatch => {
+    return {
+      authLogin: (data) => dispatch(actionUsers.heandleLogin(data)),
+    }
+  }
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(LoginScreen)

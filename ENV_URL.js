@@ -1,1 +1,4 @@
-export const url = 'http://192.168.137.45:4000/api/v2'
+module.exports = {
+    apiUrl: "http://192.168.0.62:4000/api/v2",
+    baseUrl: "http://192.168.0.62:4000"
+}

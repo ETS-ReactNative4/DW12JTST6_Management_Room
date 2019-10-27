@@ -16,7 +16,7 @@ export default class CustomersAddScreen extends Component {
       name: "",
       identity_number: "",
       phone_number: "",
-      image: "https://cdn1.iconfinder.com/data/icons/flat-business-icons/128/user-512.png"
+      image: ""
       
     };
   }
@@ -66,7 +66,7 @@ export default class CustomersAddScreen extends Component {
         name:this.state.name,
         identity_number:this.state.identity_number,
         phone_number:this.state.phone_number,
-        image:this.state.image
+        image:"https://cdn1.iconfinder.com/data/icons/flat-business-icons/128/user-512.png"
     }
       console.log('INI DATA',data)
     
@@ -77,11 +77,11 @@ export default class CustomersAddScreen extends Component {
             'authorization': token
         },
         data,
-        url: 'http://192.168.137.45:4000/api/v2/customer'
+        url: `${URL.apiUrl}/customer`
     })
     setTimeout(()=>{
-        alert('success!')
-    },1000)
+        this.props.navigation.navigate('Customer')
+    },2000)
   }
   render() {
     let { image } = this.state
@@ -98,15 +98,6 @@ export default class CustomersAddScreen extends Component {
           </Body>
         </Header>
         <View>
-          <View style={{alignItems:'center'}}>
-            <Image source={{ uri: image }} style={{ marginVertical:10, width: 100, height: 100 }} />
-            <Button 
-              style={{width:53,height:53}}
-              rounded danger
-              onPress={ this._openCamera }>
-              <Icon name="camera"></Icon>
-            </Button>
-          </View>
           <TextInput 
               placeholder='Name'
               style={{fontSize:18, height:44, borderWidth:1, paddingHorizontal:10, margin:10, borderRadius:5, color:"white", borderColor:"white"}}
@@ -134,6 +125,15 @@ export default class CustomersAddScreen extends Component {
                     phone_number:text
                 })
               }}/>
+              <View style={{alignItems:'center'}}>
+                <Button 
+                  style={{width:53,height:53}}
+                  rounded danger
+                  onPress={ this._openCamera }>
+                  <Icon name="camera"></Icon>
+                </Button>
+                <Image source={{ uri: image }} style={{ marginVertical:10, width: 100, height: 100 }} />
+              </View>
         </View>
         
         <View style={{ margin:10 }}>

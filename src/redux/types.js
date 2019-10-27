@@ -14,3 +14,4 @@ export const UPDATE_ORDER= "UPDATE_ORDER";
 export const DELETE_ORDER= "DELETE_ORDER";
 
 export const GET_USER = "GET_USER";
+export const AUTH_LOGIN = "AUTH_LOGIN";

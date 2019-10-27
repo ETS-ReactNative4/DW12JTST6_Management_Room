@@ -1,40 +1,71 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux'
 import { FlatGrid } from 'react-native-super-grid';
-import { Text, View, StyleSheet, TouchableOpacity } from 'react-native';
+import { Text, View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
-import { Container, Header, Item, Input, Button, Icon, Right, Left, Body} from 'native-base';
-import Modal from "react-native-modal";
+import { Container, Header,  Icon, Fab, Body} from 'native-base';
+import { withNavigation } from 'react-navigation';
 import * as actionRooms from '../redux/actions/actionRooms';
 import AuthService from '../AuthService';
+import Axios from 'axios';
+import URL from '../../ENV_URL';
 
 class RoomScreen extends Component {
   constructor(props){
     super(props);
     this.state={
-      isModalVisible: false
+      isModalVisible: false,
+      active:false,
+      roomData:[]
     }
   }
   
   async componentDidMount() {
-    const token = await(new AuthService).fetch('token')
-    this.props.getRooms(token)
-    // console.log("CONSOLEE: "+ this.props.roomsLocal)
-    
+    this.getDatas()
+    const { navigation } = this.props;
+    this.focusListener = navigation.addListener('didFocus', () =>
+    {
+      this.getDatas()
+    });
   }
-  toggleModal = () => {
-    this.setState({ isModalVisible: !this.state.isModalVisible });
-  };
+  getDatas  = async()=>{
+    let token = await (new AuthService).fetch('token');       
+    await this.props.getRooms(token)
+    setTimeout(() => {
+        this.setState({
+          roomData:this.props.roomsLocal.rooms,
+          token,
+        });
+    }, 2000);
+
+  }
+  alertConfirm(item){
+    Alert.alert(
+        'Delete Item',
+        'Are you sure to delete this item ?',
+        [
+            {text: 'Yes', onPress: ()=> this.deleteRoom(item)},
+            {text: 'No', onPress: ()=> '', style:'cancel'}
+        ]
+    )
+}
+  deleteRoom = async (id) => {
+    const token = await (new AuthService).fetch('token')
+    // console.log("INI AIDI: ",token)
+    await Axios({
+        method: "DELETE",
+        headers: {
+            'content-type': 'application/json',
+            'authorization': token
+        },
+        url: `${URL.apiUrl}/room/${id}`
+    })
+    await this.getDatas()
+  }
   render() {
     const items = [
         { name: 'NEPHRITIS', code: '#27ae60' },{ name: 'ASBESTOS', code: '#7f8c8d' },
       ];
-    // const items=[{}]
-    // const Items_len = this.props.roomsLocal
-    // for(i=0; i<=Items_len.length(); i++){
-    //     name :items.name,
-
-    // }
     return (
       <Container style={{backgroundColor:'#455a64'}}>
         <Header style={{marginTop:20, backgroundColor:'#02a6f7'}}>
@@ -46,32 +77,32 @@ class RoomScreen extends Component {
         <ScrollView>
           <FlatGrid
             itemDimension={130}
-            items={this.props.roomsLocal}
+            items={this.props.roomsLocal.rooms}
             style={styles.gridView}
             // staticDimension={300}
             // fixed
             // spacing={20}
             renderItem={({ item, index }) => (
-            <TouchableOpacity onPress={()=>this.toggleModal}>
-              <View style={[styles.itemContainer, { backgroundColor: item.code }]}>
-                  <Text style={styles.itemName}>{item.name}</Text>
-                  <Text style={styles.itemCode}>{item.code}</Text>
-              </View>
-              <View style={{ flex: 1 }}>
-                <Modal 
-                  animationType="slide"
-                  transparent={false}
-                  isVisible={this.state.isModalVisible}>
-                  <View style={{ flex: 1 }}>
-                    <Text>Hello!</Text>
-                    <Button title="Hide modal" onPress={this.toggleModal} />
-                  </View>
-                </Modal>
-              </View>
-            </TouchableOpacity>
+              <TouchableOpacity onLongPress={()=> this.alertConfirm(item.id)} onPress={()=> this.props.navigation.navigate("RoomEdit",{dataEdit:item})}>
+                <View style={[styles.itemContainer, { backgroundColor: '#27ae60' }]}>
+                    <Text style={styles.itemName}>{item.name}</Text>
+                    {/* <Text style={styles.itemCode}>{item.code}</Text> */}
+                </View>
+              </TouchableOpacity>
             )}
           />
         </ScrollView>
+        <View style={{ flex: 1 }}>
+          <Fab
+            style={{backgroundColor:'#02a6f7'}}
+            active={this.state.active}
+            direction="up"
+            containerStyle={{ }}
+            position="bottomRight"
+            onPress={() => this.props.navigation.navigate('RoomAdd')}>
+            <Icon name="add" />
+          </Fab>
+        </View>
       </Container>
     );
   }
@@ -79,7 +110,7 @@ class RoomScreen extends Component {
 
 const mapStateToProps = state => {
   return {
-    roomsLocal: state.Rooms.rooms
+    roomsLocal: state.Rooms
   }
 }
 
@@ -116,4 +147,4 @@ const styles = StyleSheet.create({
   export default connect(
     mapStateToProps,
     mapDispatchToProps
-  )(RoomScreen);
+  )(withNavigation(RoomScreen));

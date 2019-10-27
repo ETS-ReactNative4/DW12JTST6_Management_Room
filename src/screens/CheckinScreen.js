@@ -14,14 +14,14 @@ class CheckinScreen extends Component {
   async componentDidMount() {
     const token = await(new AuthService).fetch('token')
     this.props.getOrders(token)
-    // console.log("CONSOLEE: "+ this.props.roomsLocal)
+    // console.log("CONSOLEE: "+ this.props.ordersLocal)
   }
   render() {
     const items = [
         { name: 'NEPHRITIS', code: '#27ae60' },{ name: 'ASBESTOS', code: '#7f8c8d' },
       ];
     // const items=[{}]
-    // const Items_len = this.props.roomsLocal
+    // const Items_len = this.props.ordersLocal
     // for(i=0; i<=Items_len.length(); i++){
     //     name :items.name,
 
@@ -36,15 +36,14 @@ class CheckinScreen extends Component {
         <ScrollView>
             <FlatGrid
                 itemDimension={130}
-                items={this.props.roomsLocal}
+                items={this.props.ordersLocal.orders}
                 style={styles.gridView}
                 // staticDimension={300}
                 // fixed
                 // spacing={20}
                 renderItem={({ item, index }) => (
-                <View style={[styles.itemContainer, { backgroundColor: item.code }]}>
+                <View style={[styles.itemContainer, { backgroundColor: '#7f8c8d' }]}>
                     <Text style={styles.itemName}>{item.name}</Text>
-                    <Text style={styles.itemCode}>{item.code}</Text>
                 </View>
                 )}
             />
@@ -56,13 +55,13 @@ class CheckinScreen extends Component {
 
 const mapStateToProps = state => {
   return {
-    roomsLocal: state.Rooms.rooms
+    ordersLocal: state.Orders
   }
 }
 
 const mapDispatchToProps = dispatch => {
   return {
-    getOrders: (token) => dispatch(actionRooms.handleGetOrders(token))
+    getOrders: (token) => dispatch(actionOrders.handleGetOrders(token))
   }
 }
 

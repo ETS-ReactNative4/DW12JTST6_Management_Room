@@ -4,10 +4,16 @@ import { createMaterialBottomTabNavigator } from 'react-navigation-material-bott
 import { View } from 'react-native';
 import { Icon } from 'native-base';
 import CheckinScreen from '../screens/CheckinScreen';
+// ROOM 
 import RoomScreen from '../screens/RoomScreen';
+import RoomAddScreen from '../screens/RoomAddScreen';
+import RoomEditScreen from '../screens/RoomEditScreen';
+// CUSTOMER 
 import CustomerScreen from '../screens/CustomerScreen';
-import SettingScreen from '../screens/SettingScreen';
 import CustomerAddScreen from '../screens/CustomerAddScreen';
+import CustomerEditScreen from '../screens/CustomerEditScreen';
+
+import SettingScreen from '../screens/SettingScreen';
 
   
 const StackCustomer = createStackNavigator({
@@ -23,8 +29,33 @@ const StackCustomer = createStackNavigator({
             header: null,
         },
     },
+    CustomerEdit: {
+        screen: CustomerEditScreen,
+        navigationOptions: {
+            header: null,
+        },
+    },
 })
-
+const StackRoom = createStackNavigator({
+    Room: {
+        screen: RoomScreen,
+        navigationOptions: {
+            header: null,
+        },
+    },
+    RoomAdd: {
+        screen: RoomAddScreen,
+        navigationOptions: {
+            header: null,
+        },
+    },
+    RoomEdit: {
+        screen: RoomEditScreen,
+        navigationOptions: {
+            header: null,
+        },
+    },
+})
 const TabNavigator = createMaterialBottomTabNavigator({
     Checkin: { 
         screen: CheckinScreen ,
@@ -38,7 +69,7 @@ const TabNavigator = createMaterialBottomTabNavigator({
         }
     },
     Room: { 
-        screen: RoomScreen ,
+        screen: StackRoom ,
         navigationOptions: {
             tabBarLabel : 'Room',
             tabBarIcon : ({tintColor}) =>(

@@ -1,5 +1,5 @@
 import * as types from '../types'
-import * as URL from '../../../ENV_URL'
+import URL from '../../../ENV_URL'
 
 import axios from 'axios'
 
@@ -7,7 +7,7 @@ export const handleGetCustomers = (token) => ({
     type: types.GET_CUSTOMERS,
     payload: axios({
         method: "GET",
-        url : URL.url+`/customers`,
+        url : `${URL.apiUrl}/customers`,
         headers: {
             "content-type": "application/json",
             "authorization": token

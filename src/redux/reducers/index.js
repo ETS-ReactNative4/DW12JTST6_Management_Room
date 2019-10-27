@@ -16,7 +16,7 @@ const appReducer = combineReducers({
   Rooms: reducerRooms,
   Customers:reducerCustomers,
   Orders:reducerOrders,
-  User:reducerUser,
+  Users:reducerUser,
 })
 
 export default appReducer

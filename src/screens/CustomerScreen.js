@@ -1,10 +1,13 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux'
-import { Image, Text, View,FlatList, TouchableOpacity } from 'react-native';
+import { Image, Text, View,FlatList, TouchableOpacity, Alert } from 'react-native';
 import { ScrollView } from 'react-native-gesture-handler';
+import { withNavigation} from 'react-navigation';
 import { Container, Header, Button, Icon, Fab, Body} from 'native-base';
 import * as actionCustomers from './../redux/actions/actionCustomers'
 import AuthService from '../AuthService';
+import Axios from 'axios';
+import URL from '../../ENV_URL';
 
 
 class CustomerScreen extends Component {
@@ -12,13 +15,58 @@ class CustomerScreen extends Component {
     super(props); 
     this.state = {
       active: false,
-
+      customersData: []
     }; 
   }
 
   async componentDidMount() {
-    const token = await(new AuthService).fetch('token')
-    this.props.getCustomers(token)
+    this.getDatas()
+    const { navigation } = this.props;
+    this.focusListener = navigation.addListener('didFocus', () =>
+    {
+      this.getDatas()
+    });
+  }
+
+  alertConfirm(item){
+    Alert.alert(
+        'Delete Item',
+        'Are you sure to delete this item ?',
+        [
+            {text: 'Yes', onPress: ()=> this.deleteCustomer(item)},
+            {text: 'No', onPress: ()=> '', style:'cancel'}
+        ]
+    )
+  }
+  getDatas  = async()=>{
+    let token = await (new AuthService).fetch('token');       
+    await this.props.getCustomers(token)
+    setTimeout(() => {
+        this.setState({
+          customersData:this.props.customersLocal.customers,
+          token,
+        });
+    }, 2000);
+  }
+  componentWillUnmount(){
+      // Remove the event listener
+      this.focusListener.remove();
+  }
+  goToEditScreen(item){
+    this.props.navigation.navigate("CustomerEdit", {dataEdit:item})
+  }
+  deleteCustomer = async (id)=>{
+    const token = await (new AuthService).fetch('token')
+    // console.log("INI AIDI: ",token)
+    await Axios({
+        method: "DELETE",
+        headers: {
+            'content-type': 'application/json',
+            'authorization': token
+        },
+        url: `${URL.apiUrl}/customer/${id}`
+    })
+    await this.getDatas()
   }
   render() {
     return (
@@ -31,11 +79,11 @@ class CustomerScreen extends Component {
         <ScrollView>
         
           <FlatList 
-            data = {this.props.customersLocal} 
+            data = {this.props.customersLocal.customers} 
             renderItem={({item})=>{
               // console.log(`item = ${JSON.stringify(item)}, index = ${index}`);
               return(
-                <TouchableOpacity onPress={()=> this.props.navigation.navigate('CustomerEdit')}>
+                <TouchableOpacity onLongPress={()=> this.alertConfirm(item.id)} onPress={()=> this.goToEditScreen(item)}>
                   <View style={{flex:1}}>
                     <View style={{flex:1, flexDirection:'row', borderBottomWidth:1}}>
                         <Image 
@@ -83,7 +131,7 @@ class CustomerScreen extends Component {
 
 const mapStateToProps = state => {
   return {
-    customersLocal: state.Customers.customers
+    customersLocal: state.Customers
   }
 }
 
@@ -96,5 +144,5 @@ const mapDispatchToProps = dispatch => {
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(CustomerScreen);
+)(withNavigation(CustomerScreen));
 // export default FavouriteScreen;
