@@ -9,6 +9,8 @@ import * as actionRooms from '../redux/actions/actionRooms';
 import AuthService from '../AuthService';
 import Axios from 'axios';
 import URL from '../../ENV_URL';
+import AnimatedLoader from 'react-native-animated-loader';
+
 
 class RoomScreen extends Component {
   constructor(props){
@@ -16,12 +18,13 @@ class RoomScreen extends Component {
     this.state={
       isModalVisible: false,
       active:false,
-      roomData:[]
+      roomData:[],
+      visible:false
+
     }
   }
   
   async componentDidMount() {
-    this.getDatas()
     const { navigation } = this.props;
     this.focusListener = navigation.addListener('didFocus', () =>
     {
@@ -29,15 +32,18 @@ class RoomScreen extends Component {
     });
   }
   getDatas  = async()=>{
-    let token = await (new AuthService).fetch('token');       
+    let token = await (new AuthService).fetch('token');
+    this.setState({
+      visible: !this.state.visible,      
+    });         
     await this.props.getRooms(token)
     setTimeout(() => {
         this.setState({
+          visible: !this.state.visible,      
           roomData:this.props.roomsLocal.rooms,
           token,
         });
-    }, 2000);
-
+    }, 500);
   }
   alertConfirm(item){
     Alert.alert(
@@ -48,8 +54,11 @@ class RoomScreen extends Component {
             {text: 'No', onPress: ()=> '', style:'cancel'}
         ]
     )
-}
+  }
   deleteRoom = async (id) => {
+    this.setState({
+      visible: !this.state.visible,      
+    });  
     const token = await (new AuthService).fetch('token')
     // console.log("INI AIDI: ",token)
     await Axios({
@@ -60,23 +69,34 @@ class RoomScreen extends Component {
         },
         url: `${URL.apiUrl}/room/${id}`
     })
+    this.loading()
     await this.getDatas()
   }
+  loading = () => {
+    setTimeout(() => {
+        this.setState({
+            visible: !this.state.visible,      
+        });    
+    }, 1000);  
+  };
   render() {
-    const items = [
-        { name: 'NEPHRITIS', code: '#27ae60' },{ name: 'ASBESTOS', code: '#7f8c8d' },
-      ];
+    const { visible } = this.state;
     return (
       <Container style={{backgroundColor:'#455a64'}}>
-        <Header style={{marginTop:20, backgroundColor:'#02a6f7'}}>
-          <Body>
+        <AnimatedLoader 
+          visible={visible} 
+          overlayColor="rgba(255,255,255,0.75)" 
+          animationStyle={styles.lottie} 
+          speed={1} 
+        />
+        <Header style={{marginTop:20, backgroundColor:'#e67e22'}}>
+          <Body style={{ alignItems:'center'}}>
             <Text style={{fontSize:20, color:'white', fontWeight:'bold'}}>Room</Text>
           </Body>
         </Header>
-        
         <ScrollView>
           <FlatGrid
-            itemDimension={130}
+            itemDimension={100}
             items={this.props.roomsLocal.rooms}
             style={styles.gridView}
             // staticDimension={300}
@@ -94,7 +114,7 @@ class RoomScreen extends Component {
         </ScrollView>
         <View style={{ flex: 1 }}>
           <Fab
-            style={{backgroundColor:'#02a6f7'}}
+            style={{backgroundColor:'#e67e22'}}
             active={this.state.active}
             direction="up"
             containerStyle={{ }}
@@ -126,16 +146,21 @@ const styles = StyleSheet.create({
       marginTop: 20,
       flex: 1,
     },
+    lottie: {
+      width: 100,    
+      height: 100,  
+    },
     itemContainer: {
       justifyContent: 'flex-end',
       borderRadius: 5,
       padding: 10,
-      height: 150,
+      height: 100,
     },
     itemName: {
       fontSize: 16,
       color: '#fff',
       fontWeight: '600',
+      justifyContent:'center'
     },
     itemCode: {
       fontWeight: '600',

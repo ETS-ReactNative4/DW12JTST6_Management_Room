@@ -3,32 +3,27 @@ import {
 StyleSheet,
 Text,
 View,
-Image
+Image,
+KeyboardAvoidingView,
 } from 'react-native';
 
 export default class Logo extends Component {
 
 render(){
     return(
-        <View style={styles.container}>
-            <Image  style={{width:150, height: 150}}
+        <KeyboardAvoidingView style={styles.container} behavior='padding' enabled>
+            <Image  style={{width:200, height: 200}}
                 source={require('../../assets/logo.png')}/>
-            <Text style={styles.logoText}>Clone Webtoon App.</Text>
-        </View>
+        </KeyboardAvoidingView>
         )
     }
 }
 
 const styles = StyleSheet.create({
     container : {
-        marginTop:30,
+        // marginTop:30,
         flexGrow: 1,
-        // justifyContent:'center',
+        justifyContent:'center',
         alignItems: 'center'
     },
-    logoText : {
-        marginTop: 15,
-        fontSize:18,
-        color:'rgba(255, 255, 255, 0.7)'
-    }
 });

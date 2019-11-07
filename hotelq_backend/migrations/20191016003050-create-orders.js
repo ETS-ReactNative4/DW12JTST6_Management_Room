@@ -18,6 +18,7 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       order_end_time: {
+        allowNull: false,
         type: Sequelize.DATE
       },
       customer_id: {

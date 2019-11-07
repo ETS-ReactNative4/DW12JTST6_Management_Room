@@ -1,10 +1,46 @@
 const models = require('../models')
 const Customers = models.customers
+const fs = require('fs');
 
 
 exports.index= (req, res)=>{
     Customers.findAll().then(customers=>res.send(customers))
 }
+
+exports.getCustumerById= (req, res)=>{
+    Customers.findOne({
+        where:{
+            id:req.params.id        
+    }}).then(customers=>res.send(customers))
+}
+
+// exports.store = (req, res)=>{
+//     const data = {
+// 	"name": req.body.name,
+// 	"identity_number": req.body.identity_number,
+// 	"phone_number": req.body.phone_number,
+// 	"image": req.file.path,
+//     }
+//     try{
+//         Customers.create(data).then(customers=>{
+//             if(customers){
+//                 res.send({
+//                     message:"Success created customers",
+//                     customers
+//                 })
+//             }else{
+//                 res.send({
+//                     message:"Error to create customers"
+//                 })
+//             }
+//         })
+//     }catch(err){
+//         res.send({
+//             err,
+//             req:data
+//         })
+//     }
+// }
 
 exports.store = (req, res) => {
     Customers.create(

@@ -1,5 +1,6 @@
 const express = require('express')
 const bodyParser = require('body-parser')
+// const multer = require('multer');
 require('express-group-routes')
 
 const app = express()
@@ -15,10 +16,11 @@ const RoomsController = require('./controllers/rooms')
 const CustomersController = require('./controllers/customers')
 const OrdersController = require('./controllers/orders')
 const AuthController = require('./controllers/auth')
+const HistoriesController = require('./controllers/histories')
 
 // Middleware
 const { authenticated } = require('./middleware')
-// const {upload} = require('./upload')
+const { upload } = require('./upload')
 
 
 app.get('/', (req, res) => {
@@ -45,8 +47,11 @@ app.group('/api/v2', (router)=>{
 
     // customers 
     router.get('/customers',authenticated,CustomersController.index)
+    router.get('/customer/:id',authenticated,CustomersController.getCustumerById)
     // customers CREATE 
     router.post('/customer',authenticated, CustomersController.store)
+    // router.post('/customer', authenticated, upload.single('image'), CustomersController.store)
+
     // customers UPDATE 
     router.patch('/customer/:customer_id',authenticated, CustomersController.update)
     // customers DELETE 
@@ -58,8 +63,12 @@ app.group('/api/v2', (router)=>{
     // Order CREATE 
     router.post('/checkin',authenticated, OrdersController.store)
     // Order UPDATE 
-    router.patch('/checkout/:order_id',authenticated, OrdersController.update)
+    router.delete('/checkout/:order_id',authenticated, OrdersController.checkout)
     
+
+    // History
+    router.post('/histories',authenticated, HistoriesController.store)
+
     
 
 }),

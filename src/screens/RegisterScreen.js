@@ -1,35 +1,30 @@
 import React, { Component } from 'react';
-import {
-StyleSheet,
-Text,
-View,
-StatusBar ,
-TextInput,
-TouchableOpacity
-} from 'react-native';
-
-import { Button } from 'native-base';
+import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView} from 'react-native';
+import { Button, Icon, Spinner } from 'native-base';
 import Logo from '../components/Logo';
-import axios from 'axios';
 import AuthService from '../AuthService';
-export default class RegisterScreen extends Component {
+import { connect } from 'react-redux';
+import * as actionUsers from './../redux/actions/actionUsers';
+import AnimatedLoader from 'react-native-animated-loader';
+
+class RegisterScreen extends Component {
     constructor(){
         super();
         this.state ={
-            username: 'vavan',
-            email:'vavan@gmail.com',
+            username:'',
+            email:'',
             validate_email : false,
-            password:'vavan',
+            password:'',
             isSecureTextEntry:false,
             // fixEmail: 'irvan@gmail.com',
             // fixPassword : 'irvan',
-            loading:false
+            loading:false,
+            visible:false
         }
     }
+
     async componentDidMount(){
-        if(await (new AuthService).exist()){
-            this.props.navigation.navigate('ForYou')
-        }
+
     }
 
     checkEmail = () =>{
@@ -41,53 +36,59 @@ export default class RegisterScreen extends Component {
         }
         else {
             this.setState({validate_email:true})
-            this.checkLogin()
+            this.handleRegister()
         }
     }
-    checkLogin = async() =>{
-        
-        const auth = new (AuthService);
-        const url = 'https://clowtoon-api.herokuapp.com/api/v1/register'
-        await axios({
-            method : 'POST',
-            headers :{
-                'content-type': 'application/json',
-            },
-            data : {
-                username:this.state.username,
-                email :this.state.email,
-                password: this.state.password
-            },
-            url,
-        }).then(async result =>{
-            if(result.data.error){
-                alert("Error to register")
-            }else{
-                const user = {
-                    id:result.data.id,
-                    token:result.data.token
-                }
-                await auth.save(user)
-                this.props.navigation.navigate('ForYou');
-                    
-            }
-        }).catch(error=>{
-            console.log('errornya: ',error)
-        })
+    handleRegister = async() =>{
+        const data = {
+            username:this.state.username,
+            email :this.state.email,
+            password: this.state.password,
+            image:"https://engineering.tamu.edu/_files/_images/_profile-images/no-photo-people-profile.jpg"
+        }
+        this.setState({
+            visible: !this.state.visible,      
+        });  
+        await this.props.authRegister(data)
+        const register = this.props.authDataLocal.users
+        console.log("INI register :", register)
+        if(register){
+            const auth = new (AuthService)
+            await auth.save(register)
+            this.props.navigation.navigate('Room')
+            this.loading()
+        }else{
+            alert(JSON.stringify(register.message))
+        }
     }
     showPassword=()=>{
         this.setState({
             isSecureTextEntry: !this.state.isSecureTextEntry
         })
     }
-    render() {
-        return(
-            <View style={styles.container}>
+    loading = () => {
+        setTimeout(() => {
+            this.setState({
+                visible: !this.state.visible,      
+            });    
+        }, 1000);  
+    };
+    render(){
+        const { visible } = this.state;
+        return (   
+            <KeyboardAvoidingView style={styles.container} behavior="padding" enabled>
+                <AnimatedLoader 
+                    visible={visible} 
+                    overlayColor="rgba(255,255,255,0.75)" 
+                    animationStyle={styles.lottie} 
+                    speed={1} 
+                />
                 <Logo/>
                 <View style={styles.form}>
                     <TextInput
                         style={styles.inputBox}
                         underlineColorAndroid='rgba(0,0,0,0)'
+                        autoCapitalize="none"
                         placeholder="Username"
                         placeholderTextColor="#ffffff"
                         selectionColor="#fff"
@@ -118,6 +119,8 @@ export default class RegisterScreen extends Component {
                         style={styles.inputBox}
                         underlineColorAndroid="rgba(0,0,0,0)"
                         placeholder="Password"
+                        placeholderTextColor="#ffffff"
+                        selectionColor="#fff"
                         value={this.state.password}
                         secureTextEntry={!this.state.isSecureTextEntry}
                         onChangeText={(text)=>{
@@ -134,35 +137,42 @@ export default class RegisterScreen extends Component {
                     </TouchableOpacity> */}
                     
                     <Button block info style={styles.button} onPress={()=> this.checkEmail()}>
-                        <Text style={{justifyContent:'center', color:'white'}}>Sign Up</Text>
+                        <Text style={{justifyContent:'center', color:'white'}}>Sign up</Text>
                     </Button>
+
                 </View>
-                <View style={styles.signupTextCont}>
-                <Text style={styles.signupText}>Already have an account?</Text>
-                <TouchableOpacity onPress={()=>this.props.navigation.navigate("Login")}><Text style={styles.signupButton}> Sign in</Text></TouchableOpacity>
-                </View>
-            </View>
+                {/* <View style={styles.signupTextCont}>
+                    <Text style={styles.signupText}>Dont have an account yet?</Text>
+                    <TouchableOpacity onPress={()=> this.props.navigation.navigate("Register")}>
+                        <Text style={styles.signupButton}> Signup</Text>
+                    </TouchableOpacity>
+                </View> */}
+            </KeyboardAvoidingView>
         )
     }
 }
 
 const styles = StyleSheet.create({
-    container : {
-        backgroundColor:'#455a64',
+    container : {        
+        backgroundColor:'#f1f2f6',
         flex: 1,
         alignItems:'center',
-        justifyContent :'center'
+        // justifyContent :'center'
+    },
+    lottie: {
+        width: 100,    
+        height: 100,  
     },
     form : {
-        marginTop:-50,
+        marginTop:-30,
         flexGrow: 1,
         // justifyContent:'center',
         alignItems: 'center'
     },
     inputBox: {
         width:300,
-        height:45,
-        backgroundColor:'rgba(255, 255,255,0.2)',
+        height:50,
+        backgroundColor:'#eccc68',
         borderRadius: 25,
         paddingHorizontal:16,
         fontSize:16,
@@ -171,7 +181,7 @@ const styles = StyleSheet.create({
     },
     button: {
         width:300,
-        backgroundColor:'#1c313a',
+        backgroundColor:'#d35400',
         borderRadius: 25,
         marginVertical: 10,
         paddingVertical: 13
@@ -190,12 +200,27 @@ const styles = StyleSheet.create({
         flexDirection:'row'
     },
     signupText: {
-        color:'rgba(255,255,255,0.6)',
+        color:'#7f8c8d',
         fontSize:16
     },
     signupButton: {
-        color:'#ffffff',
+        color:'#2c3e50',
         fontSize:16,
         fontWeight:'500'
     }
-});
+})
+
+const mapStateToProps = state => {
+    return {
+        authDataLocal: state.Users
+    }
+  }
+  const mapDispatchToProps = dispatch => {
+    return {
+      authRegister: (data) => dispatch(actionUsers.handleRegister(data)),
+    }
+  }
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
+)(RegisterScreen)

@@ -24,12 +24,11 @@ exports.login = (req, res) => {
         if(user){
             const token = jwt.sign({ userId: user.id}, 'my-secret-key')
             res.send({
-                // message: "Success logged in",
                 username:user.username,
                 password: user.password,
-                // email:user.email,
-                // id : user.id,
-                token: token
+                email:user.email,
+                token: token,
+                image:user.image,
             })
         }else{
             res.send({
@@ -50,18 +49,16 @@ exports.register = (req, res) => {
                     username:req.body.username,
                     email:req.body.email,
                     password: md5(req.body.password),
-                    image:"https://via.placeholder.com/1080"
-                    // password: req.body.password
+                    image:req.body.image,
                 }).then(user => {
                     if(user){
                         const token = jwt.sign({ userId: user.id}, 'my-secret-key')
                         res.send({
-                            response:{
-                                message:"Success registered user",
-                                username:user.username,
-                                email:user.email,
-                                token: token
-                            }
+                            username:user.username,
+                            password: user.password,
+                            email:user.email,
+                            token: token,
+                            image:user.image,
                         })
                     }else{
                         res.send({

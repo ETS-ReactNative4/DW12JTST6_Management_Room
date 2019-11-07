@@ -3,7 +3,7 @@ import URL from '../../../ENV_URL'
 import axios from 'axios'
 
 export const handleGetOrders = (token) => ({
-    type: types.GET_EPISODE_DETAIL,
+    type: types.GET_ORDERS,
     payload: axios({
         method: "GET",
         url : `${URL.apiUrl}/checkin`,

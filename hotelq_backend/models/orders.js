@@ -10,12 +10,8 @@ module.exports = (sequelize, DataTypes) => {
   }, {});
   orders.associate = function(models) {
     orders.belongsTo(models.customers,{
-      as:'customerData',
+      as:'customer',
       foreignKey:'customer_id',
-    }),
-    orders.belongsTo(models.rooms,{
-      as:'roomData',
-      foreignKey:'room_id',
     })
   };
   return orders;

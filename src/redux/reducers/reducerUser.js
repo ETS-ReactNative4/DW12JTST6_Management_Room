@@ -50,6 +50,26 @@ export default function reducerUser(state = initialState, action) {
         isLoading: false,
         isError: true
       };
+    case `${types.AUTH_REGISTER}_PENDING`:
+      return {
+        ...state,
+        isLoading: true
+      };
+
+    case `${types.AUTH_REGISTER}_FULFILLED`:
+      return {
+        ...state,
+        isLoading: false,
+        isSuccess: true,
+        users: action.payload.data
+      };
+
+    case `${types.AUTH_REGISTER}_REJECTED`:
+      return {
+        ...state,
+        isLoading: false,
+        isError: true
+      };
     default:
       return state;
   }

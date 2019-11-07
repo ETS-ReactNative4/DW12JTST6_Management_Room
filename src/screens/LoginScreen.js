@@ -1,23 +1,25 @@
 import React, { Component } from 'react';
-import { View, Text, StyleSheet, TextInput, ScrollView} from 'react-native';
+import { View, Text, StyleSheet, TextInput, KeyboardAvoidingView} from 'react-native';
 import { Button, Icon, Spinner } from 'native-base';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import Logo from '../components/Logo';
 import AuthService from '../AuthService';
 import { connect } from 'react-redux';
 import * as actionUsers from './../redux/actions/actionUsers';
+import AnimatedLoader from 'react-native-animated-loader';
 
 class LoginScreen extends Component {
     constructor(){
         super();
         this.state ={
-            email:'dinda@gmail.com',
+            email:'',
             validate_email : false,
-            password:'dinda',
+            password:'',
             isSecureTextEntry:false,
             // fixEmail: 'irvan@gmail.com',
             // fixPassword : 'irvan',
-            loading:false
+            loading:false,
+            visible:false
         }
     }
 
@@ -44,14 +46,20 @@ class LoginScreen extends Component {
             email :this.state.email,
             password: this.state.password
         }
+        this.setState({
+            visible: !this.state.visible,      
+        });  
         await this.props.authLogin(data)
         const login = this.props.authDataLocal.users
-        if(login){
+        // console.log("INI LOGIN :", login)
+        if(login.error==true){
+            this.loading()
+            alert(JSON.stringify(login.message))
+        }else{
             const auth = new (AuthService)
             await auth.save(login)
             this.props.navigation.navigate('Room')
-        }else{
-            alert(login.message)
+            this.loading()
         }
     }
     showPassword=()=>{
@@ -59,9 +67,23 @@ class LoginScreen extends Component {
             isSecureTextEntry: !this.state.isSecureTextEntry
         })
     }
+    loading = () => {
+        setTimeout(() => {
+            this.setState({
+                visible: !this.state.visible,      
+            });    
+        }, 1000);  
+    };
     render(){
+        const { visible } = this.state;
         return (   
-            <View style={styles.container}>
+            <KeyboardAvoidingView style={styles.container} behavior="height" enabled>
+                <AnimatedLoader 
+                    visible={visible} 
+                    overlayColor="rgba(255,255,255,0.75)" 
+                    animationStyle={styles.lottie} 
+                    speed={1} 
+                />
                 <Logo/>
                 <View style={styles.form}>
                     <TextInput
@@ -84,6 +106,8 @@ class LoginScreen extends Component {
                         style={styles.inputBox}
                         underlineColorAndroid="rgba(0,0,0,0)"
                         placeholder="Password"
+                        placeholderTextColor="#ffffff"
+                        selectionColor="#fff"
                         value={this.state.password}
                         secureTextEntry={!this.state.isSecureTextEntry}
                         onChangeText={(text)=>{
@@ -110,28 +134,32 @@ class LoginScreen extends Component {
                         <Text style={styles.signupButton}> Signup</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </KeyboardAvoidingView>
         )
     }
 }
 
 const styles = StyleSheet.create({
     container : {        
-        backgroundColor:'#455a64',
+        backgroundColor:'#f1f2f6',
         flex: 1,
         alignItems:'center',
         // justifyContent :'center'
     },
+    lottie: {
+        width: 100,    
+        height: 100,  
+    },
     form : {
-        marginTop:-50,
+        // marginTop:-50,
         flexGrow: 1,
         // justifyContent:'center',
         alignItems: 'center'
     },
     inputBox: {
         width:300,
-        height:45,
-        backgroundColor:'rgba(255, 255,255,0.2)',
+        height:50,
+        backgroundColor:'#eccc68',
         borderRadius: 25,
         paddingHorizontal:16,
         fontSize:16,
@@ -140,7 +168,7 @@ const styles = StyleSheet.create({
     },
     button: {
         width:300,
-        backgroundColor:'#1c313a',
+        backgroundColor:'#d35400',
         borderRadius: 25,
         marginVertical: 10,
         paddingVertical: 13
@@ -159,11 +187,11 @@ const styles = StyleSheet.create({
         flexDirection:'row'
     },
     signupText: {
-        color:'rgba(255,255,255,0.6)',
+        color:'#7f8c8d',
         fontSize:16
     },
     signupButton: {
-        color:'#ffffff',
+        color:'#2c3e50',
         fontSize:16,
         fontWeight:'500'
     }
@@ -176,7 +204,7 @@ const mapStateToProps = state => {
   }
   const mapDispatchToProps = dispatch => {
     return {
-      authLogin: (data) => dispatch(actionUsers.heandleLogin(data)),
+      authLogin: (data) => dispatch(actionUsers.handleLogin(data)),
     }
   }
 export default connect(

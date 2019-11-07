@@ -14,6 +14,17 @@ export const handleGetCustomers = (token) => ({
         }
     })
 })
+export const handleGetCustomerById = (id,token) => ({
+    type: types.GET_CUSTOMERS_ID,
+    payload: axios({
+        method: "GET",
+        url : `${URL.apiUrl}/customer/${id}`,
+        headers: {
+            "content-type": "application/json",
+            "authorization": token
+        }
+    })
+})
 
 // export const handleAddCustomers = (token, data) => ({
 //     type: types.ADD_EPISODE,

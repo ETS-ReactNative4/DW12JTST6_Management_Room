@@ -29,26 +29,26 @@ export default function reducerCustomers(state = initialState, action) {
         isLoading: false,
         isError: true
       };
-      case `${types.ADD_CUSTOMER}_PENDING`:
-        return {
-          ...state,
-          isLoading: true
-        };
-  
-      case `${types.ADD_CUSTOMER}_FULFILLED`:
-        return {
-          ...state,
-          isLoading: false,
-          isSuccess: true,
-          customers: action.payload.data
-        };
-  
-      case `${types.ADD_CUSTOMER}_REJECTED`:
-        return {
-          ...state,
-          isLoading: false,
-          isError: true
-        };
+    case `${types.GET_CUSTOMERS_ID}_PENDING`:
+      return {
+        ...state,
+        isLoading: true
+      };
+
+    case `${types.GET_CUSTOMERS_ID}_FULFILLED`:
+      return {
+        ...state,
+        isLoading: false,
+        isSuccess: true,
+        customers: action.payload.data
+      };
+
+    case `${types.GET_CUSTOMERS_ID}_REJECTED`:
+      return {
+        ...state,
+        isLoading: false,
+        isError: true
+      };
     default:
       return state;
   }

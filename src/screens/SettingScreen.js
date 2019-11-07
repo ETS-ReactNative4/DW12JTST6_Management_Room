@@ -1,64 +1,85 @@
 import React, { Component } from 'react';
-import { connect } from 'react-redux'
-import { Image, Text, View } from 'react-native';
-import { Container, Header, Button, Icon, Right, Left, Body} from 'native-base';
-import * as actionUser from './../redux/actions/actionUsers';
+import { Image, Text, View, StyleSheet, Alert } from 'react-native';
+import { Container, Header, Button, Body} from 'native-base';
 import AuthService from '../AuthService';
 
-export default class SettingScreen extends React.Component {
+export default class SettingScreen extends Component {
   constructor(){
     super();
     this.state={
-      name:'Irvan',
-      image: 'https://cdn1.iconfinder.com/data/icons/flat-business-icons/128/user-512.png',
-      email:"irvandindaprakoso@gmail.com"
+      name:'',
+      image: '',
+      email:""
     }
+  }
+  async componentDidMount() {
+    const username = await (new AuthService).fetch('username')
+    const email = await (new AuthService).fetch('email')
+    const image = await (new AuthService).fetch('image')
+    this.setState({name:username, email:email, image:image})
   }
   async logout(){
     await(new AuthService).destroy()
     this.props.navigation.navigate('Login')
   }
-  // async componentDidMount() {
-  //   const id = await(new AuthService).fetch('id')
-  //   const token = await(new AuthService).fetch('token')
-  //   this.props.getUser(id, token)
-  //   // console.log("CONSOLEE: "+ this.props.roomsLocal)
-  // }
+  alertConfirm(){
+    Alert.alert(
+        'Logout of HotelQ ',
+        'Are you sure to log out ?',
+        [
+            {text: 'Yes', onPress: ()=> this.logout()},
+            {text: 'No', onPress: ()=> '', style:'cancel'}
+        ]
+    )
+  }
   render() {
     return (
-      <Container style={{backgroundColor:'#455a64'}}>
-        <Header style={{marginTop:20, backgroundColor:'#02a6f7'}}>
-          <Body>
+      <Container style={{backgroundColor:'#f1f2f6'}}>
+        <Header style={styles.header}>
+          {/* <Body style={{ alignItems:'center'}}>
             <Text style={{fontSize:20, color:'white', fontWeight:'bold'}}>Setting</Text>
-          </Body>
+          </Body> */}
         </Header>
-        <View style={{flex:1}}>
-          <View style={{flex:1, borderBottomWidth:1, fontSize:16}}>
-            <View style={{ flex: 1, alignItems: 'center', marginVertical:20 }}>
-                <Image source={{ uri: this.state.image }} style={{ width: 200, height: 200 }} />
-                <Text style={{color:'#fff', flex:1, fontSize:18, fontWeight:'bold'}}>{this.state.name}</Text>
-                <Text style={{color:'#fff', flex:1, fontSize:18, fontWeight:'bold'}}>{this.state.email}</Text>
-            </View>
-            <Button block warning onPress={() => this.logout()}><Text>Log Out</Text></Button>
-          </View>
+        <View style={{alignItems:'center', marginTop:-110, marginBottom:30}}>
+          <Image source={{ uri: this.state.image }} style={styles.image} />
+          <Text style={styles.text}>{this.state.name}</Text>
+          <Text style={{fontSize:17, }}>{this.state.email}</Text>
+        </View>
+        <View style={{alignItems:'center'}}>
+          <Button bordered danger onPress={() => this.alertConfirm()} style={{width:110}}>
+            <Text style={{ paddingLeft:21, color: 'red', fontWeight:'bold', fontSize:16 }}>Log Out</Text>
+          </Button>
         </View>
       </Container>
     );
   }
 }
 
-// const mapStateToProps = state => {
-//     return {
-//       roomsLocal: state.User.user
-//     }
-//   }
-  
-//   const mapDispatchToProps = dispatch => {
-//     return {
-//       getUser: (id, token) => dispatch(actionUser.handleGetUser(id, token))
-//     }
-//   }
-//   export default connect(
-//       mapStateToProps,
-//       mapDispatchToProps
-//     )(SettingScreen);
+const styles = StyleSheet.create({
+  header:{
+    backgroundColor:'#e67e22',
+    height:230,
+  },
+  form:{
+    padding:10, 
+    borderRadius:7, 
+    width:'90%',
+    borderColor:'#e67e22',
+    alignItems:'center',
+    backgroundColor:"#F8EFBA",
+  },
+  image:{
+    alignItems:'center',
+    width:180,
+    height:180,
+    borderRadius: 90,
+    borderWidth:5,
+    margin:10
+  },
+  text:{
+    color:"#000",
+    fontSize:27,
+    fontWeight:'bold',
+
+  }
+})
